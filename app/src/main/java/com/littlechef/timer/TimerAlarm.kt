@@ -11,6 +11,7 @@ import android.content.Intent
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
 
 object TimerAlarm {
     private const val ACTION_FIRE = "com.littlechef.timer.FIRE"
@@ -18,12 +19,25 @@ object TimerAlarm {
     private const val EXTRA_TITLE = "title"
     private const val NOTIFICATION_ID = 1
 
-    // setAlarmClock fires exactly even in Doze and needs no SCHEDULE_EXACT_ALARM permission.
+    // setAlarmClock fires exactly in Doze mode; requires USE_EXACT_ALARM (API 33+) or SCHEDULE_EXACT_ALARM (API 31-32).
     fun schedule(context: Context, endAtMillis: Long, title: String) {
-        alarmManager(context).setAlarmClock(
-            AlarmManager.AlarmClockInfo(endAtMillis, openAppIntent(context)),
-            fireIntent(context, title),
-        )
+        val am = alarmManager(context)
+        val alarmInfo = AlarmManager.AlarmClockInfo(endAtMillis, openAppIntent(context))
+        val operation = fireIntent(context, title)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (am.canScheduleExactAlarms()) {
+                    am.setAlarmClock(alarmInfo, operation)
+                } else {
+                    am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endAtMillis, operation)
+                }
+            } else {
+                am.setAlarmClock(alarmInfo, operation)
+            }
+        } catch (e: SecurityException) {
+            // Graceful fallback if exact alarms are dynamically disabled by system or OEM policy
+            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, endAtMillis, operation)
+        }
     }
 
     fun cancel(context: Context) = alarmManager(context).cancel(fireIntent(context, ""))

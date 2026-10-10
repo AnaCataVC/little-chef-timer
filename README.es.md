@@ -22,7 +22,7 @@ Little Chef Timer es un temporizador de cocina para Android, offline y confiable
 
 ### Características Principales
 
-- **Alarmas Exactas y Confiables**: Basado en `AlarmManager.setAlarmClock`, asegurando que la campana suene a tiempo sin requerir permisos especiales invasivos (`SCHEDULE_EXACT_ALARM`).
+- **Alarmas Exactas y Confiables**: Basado en `AlarmManager.setAlarmClock`, utilizando `USE_EXACT_ALARM` (Android 13+) y `SCHEDULE_EXACT_ALARM` (Android 12) con fallback automático a `setAndAllowWhileIdle`, asegurando que la alarma suene en modo Doze sin interrupciones ni pantallas invasivas.
 - **Alarma Cíclica y Notificaciones Interactivas**: Notificaciones de alta prioridad con la bandera `FLAG_INSISTENT` y sonido en bucle hasta que el usuario confirme o presione la acción **Detener**.
 - **Resistencia al Cierre de Procesos y Reinicios**: El tiempo transcurrido y restante se calcula matemáticamente respecto a la marca de fin (`endAtMillis`), sobreviviendo cierres de proceso sin desfase de tiempo.
 - **Interfaz Reactiva sin Polling Continuo**: Reemplazo de bucles de lectura a disco por `SharedPreferences.OnSharedPreferenceChangeListener` acoplado mediante `DisposableEffect` en Compose, reduciendo drásticamente el consumo de CPU.
@@ -81,6 +81,8 @@ El binario resultante se generará en: `app/build/outputs/apk/debug/app-debug.ap
    - Los servicios en primer plano consumen batería y obligan a mostrar notificaciones persistentes. Al calcular la cuenta regresiva como una resta respecto al tiempo objetivo (`now - endAtMillis`), `AlarmClock` garantiza el despertar exacto sin gastar recursos mientras el teléfono reposa.
 3. **Sincronización reactiva frente a lecturas continuas:**
    - La UI reacciona a través de eventos con `OnSharedPreferenceChangeListener`, restringiendo el consumo de reloj a actualizaciones en memoria únicamente cuando el temporizador está visible y corriendo.
+4. **Gestión de permisos de alarmas exactas en Android 12-15:**
+   - A partir de Android 12, `setAlarmClock()` requiere permisos explícitos de alarmas exactas. Al declarar `USE_EXACT_ALARM`, el sistema otorga el permiso automáticamente al instalar sin requerir que el usuario active opciones manuales en Ajustes. Respaldar esto con comprobación `canScheduleExactAlarms()` y fallback a `setAndAllowWhileIdle()` previene caídas por `SecurityException` en cualquier personalización OEM de Android.
 
 ---
 

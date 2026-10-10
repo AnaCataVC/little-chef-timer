@@ -25,7 +25,7 @@ stateDiagram-v2
 ```
 
 - The timer state is persisted (`endAtMillis` while running, `remainingMillis` while paused), so the UI recomputes the countdown on every tick and survives the app being killed.
-- `AlarmManager.setAlarmClock` fires exactly, even in Doze, without the `SCHEDULE_EXACT_ALARM` permission.
+- `AlarmManager.setAlarmClock` fires exactly, even in Doze mode. On Android 13+ (API 33+) it uses `USE_EXACT_ALARM` (granted at install time for timer apps), on Android 12 (API 31-32) it uses `SCHEDULE_EXACT_ALARM`, and falls back to `setAndAllowWhileIdle` if exact alarms are dynamically disabled by system policy.
 - The ringing is a high-importance notification with `FLAG_INSISTENT`: its channel sound loops until the user taps **Detener** / **Stop** or dismisses it. When the notification clears or updates the timer from outside the UI, `RecipeStore` notifies listeners reactively via `SharedPreferences.OnSharedPreferenceChangeListener` (hooked into a Compose `DisposableEffect`), avoiding polling disk reads.
 
 ## Alarm sound

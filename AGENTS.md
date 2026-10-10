@@ -19,7 +19,8 @@ This document outlines architectural invariants, development conventions, and op
 
 ### Exact Alarm Clock Mechanics
 - The countdown uses `AlarmManager.setAlarmClock(AlarmClockInfo, PendingIntent)` rather than standard alarms or foreground services.
-- **Why**: `setAlarmClock` guarantees execution in Android Doze mode without requiring the sensitive/restricted `android.permission.SCHEDULE_EXACT_ALARM` permission.
+- **Why**: `setAlarmClock` guarantees execution in Android Doze mode. On Android 13+ (API 33+), it leverages `android.permission.USE_EXACT_ALARM` (automatically granted at install time for timer/alarm apps). On Android 12 (API 31-32), it uses `android.permission.SCHEDULE_EXACT_ALARM` (`maxSdkVersion="32"`).
+- **Graceful Fallback & Resilience**: `TimerAlarm.schedule` checks `canScheduleExactAlarms()` and catches `SecurityException` to seamlessly fall back to `setAndAllowWhileIdle(RTC_WAKEUP, ...)` if exact alarms are dynamically disabled by system/OEM policy, preventing runtime crashes.
 - **Timer Drift Prevention**: Timers are deterministic based on target epoch timestamps (`endAtMillis`), never accumulated elapsed ticks. Always calculate remaining time as `((endAtMillis ?: now) - now).coerceAtLeast(0)`.
 
 ### Reactive Preference Observation (Zero Disk Polling)

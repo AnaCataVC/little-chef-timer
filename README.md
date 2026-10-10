@@ -21,7 +21,7 @@ Little Chef Timer is an offline, resilient Android kitchen timer built with mode
 
 ### Key Features
 
-- **Reliable & Exact Alarms**: Powered by `AlarmManager.setAlarmClock`, ensuring notifications wake up the device on time without requiring invasive background runtime permissions (`SCHEDULE_EXACT_ALARM`).
+- **Reliable & Exact Alarms**: Powered by `AlarmManager.setAlarmClock`, leveraging `USE_EXACT_ALARM` (Android 13+) and `SCHEDULE_EXACT_ALARM` (Android 12) with automatic fallback to `setAndAllowWhileIdle`, guaranteeing wakeups in Doze mode without runtime settings prompts.
 - **Looping Alarm & Actionable Notifications**: High-importance notifications equipped with `FLAG_INSISTENT` and looping alarm sound until dismissed or confirmed with the **Stop** action.
 - **Process Death & Reboot Resilience**: Elapsed and remaining time are derived mathematically against the target completion timestamp (`endAtMillis`), surviving process death and device configuration changes without drift.
 - **Reactive UI without Polling**: Replaced disk-based polling loops with `SharedPreferences.OnSharedPreferenceChangeListener` bound through Compose `DisposableEffect`, keeping the main thread free and CPU usage minimal.
@@ -87,6 +87,8 @@ The resulting package will be generated at: `app/build/outputs/apk/debug/app-deb
    - Foreground services consume user battery and trigger persistent foreground notifications. Since countdown timers are deterministic based on target timestamps (`now - endAtMillis`), the system's native `AlarmClock` handles wakeups at exact intervals with zero CPU cycles spent while idle.
 3. **Reactive state synchronization over continuous polling:**
    - Instead of polling storage on an interval ticker to check for external notification actions, an `OnSharedPreferenceChangeListener` automatically updates Compose state only when mutations occur, restricting active tickers solely to in-memory rendering.
+4. **Exact Alarms permission handling on Android 12-15:**
+   - Android 12+ requires exact alarm permissions for `setAlarmClock()`. Declaring `USE_EXACT_ALARM` allows timer and clock apps to receive exact alarm capabilities automatically upon install without intrusive runtime settings redirects. Pairing this with `canScheduleExactAlarms()` verification and fallback to `setAndAllowWhileIdle()` prevents unhandled `SecurityException` crashes across diverse OEM Android variants.
 
 ---
 
