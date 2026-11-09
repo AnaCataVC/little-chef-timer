@@ -97,8 +97,7 @@ $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 ---
 
 ## 5. Release Automation & Artifact Integrity
-- **Automated CI/CD Release:** Pushing a semantic version tag (`git tag vX.Y.Z && git push origin vX.Y.Z`) triggers `.github/workflows/release.yml`. The workflow executes JVM unit tests, compiles the production APK, calculates its `.sha256` hash, and publishes the official release on GitHub.
-- **Official Deliverables:**
+- **Automated CI/CD Release:** Pushing a semantic version tag (`git tag vX.Y.Z && git push origin vX.Y.Z`) triggers `.github/workflows/release.yml`. The workflow executes JVM unit tests, compiles the production APK, and publishes the official release on GitHub (GitHub natively computes and displays the SHA-256 digest on the web UI).
+- **Official Deliverable:**
   - `LittleChefTimer-vX.Y.Z.apk`
-  - `LittleChefTimer-vX.Y.Z.apk.sha256`
 - **Pre-Release Invariant:** Always update and synchronize `versionCode` and `versionName` in `app/build.gradle.kts` before cutting a tag.
