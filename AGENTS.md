@@ -92,3 +92,13 @@ $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 ### Git Hygiene & Secrets
 - Never commit `local.properties` (contains absolute local SDK paths).
 - Always verify working tree status with `git status` before finishing changes.
+
+
+---
+
+## 5. Release Automation & Artifact Integrity
+- **Automated CI/CD Release:** Pushing a semantic version tag (`git tag vX.Y.Z && git push origin vX.Y.Z`) triggers `.github/workflows/release.yml`. The workflow executes JVM unit tests, compiles the production APK, calculates its `.sha256` hash, and publishes the official release on GitHub.
+- **Official Deliverables:**
+  - `LittleChefTimer-vX.Y.Z.apk`
+  - `LittleChefTimer-vX.Y.Z.apk.sha256`
+- **Pre-Release Invariant:** Always update and synchronize `versionCode` and `versionName` in `app/build.gradle.kts` before cutting a tag.
