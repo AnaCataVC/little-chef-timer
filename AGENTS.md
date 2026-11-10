@@ -98,6 +98,7 @@ $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 
 ## 5. Release Automation & Artifact Integrity
 - **Automated CI/CD Release:** Pushing a semantic version tag (`git tag vX.Y.Z && git push origin vX.Y.Z`) triggers `.github/workflows/release.yml`. The workflow executes JVM unit tests, compiles the production APK, and publishes the official release on GitHub (GitHub natively computes and displays the SHA-256 digest on the web UI).
+- **Deterministic Release Signing:** Uses GitHub Secrets (`RELEASE_KEYSTORE_BASE64`, `RELEASE_KEYSTORE_PASSWORD`, `RELEASE_KEY_ALIAS`, `RELEASE_KEY_PASSWORD`) in `.github/workflows/release.yml` to sign the release APK with the canonical certificate (`SHA-256: 377325032dc...`), ensuring seamless in-place updates on physical Android devices.
 - **Official Deliverable:**
   - `LittleChefTimer-vX.Y.Z.apk`
 - **Pre-Release Invariant:** Always update and synchronize `versionCode` and `versionName` in `app/build.gradle.kts` before cutting a tag.

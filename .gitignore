@@ -9,3 +9,8 @@ build/
 .externalNativeBuild
 .cxx
 releases/
+
+# Android signing keystores
+*.jks
+*.keystore
+keystore.jks
